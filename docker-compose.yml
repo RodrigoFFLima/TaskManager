@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskmanager-db
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  taskmanager-auth:
+    build:
+      context: .
+      dockerfile: src/TaskManager.Auth/Dockerfile
+    container_name: taskmanager-auth
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=taskmanager;Username=postgres;Password=postgres"
+      Jwt__Secret: "TaskManager_SuperSecret_Key_Min32Chars_2024!"
+      Jwt__Issuer: "TaskManager.Api"
+      Jwt__Audience: "TaskManager.Clients"
+      Jwt__ExpiryMinutes: "1440"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  taskmanager-api:
+    build:
+      context: .
+      dockerfile: src/TaskManager.Api/Dockerfile
+    container_name: taskmanager-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=taskmanager;Username=postgres;Password=postgres"
+      Jwt__Secret: "TaskManager_SuperSecret_Key_Min32Chars_2024!"
+      Jwt__Issuer: "TaskManager.Api"
+      Jwt__Audience: "TaskManager.Clients"
+      Jwt__ExpiryMinutes: "1440"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      taskmanager-auth:
+        condition: service_started
+
+  taskmanager-ui:
+    build:
+      context: frontend/task-manager-ui
+      dockerfile: Dockerfile
+    container_name: taskmanager-ui
+    ports:
+      - "4200:80"
+    depends_on:
+      - taskmanager-api
+      - taskmanager-auth
+
+volumes:
+  postgres_data:

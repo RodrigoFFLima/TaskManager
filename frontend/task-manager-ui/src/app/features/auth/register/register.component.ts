@@ -1,0 +1,129 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  template: `
+    <div class="auth-container">
+      <div class="auth-card">
+        <h1 class="auth-title">Task Manager</h1>
+        <h2 class="auth-subtitle">Create Account</h2>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" formControlName="name" placeholder="Your full name"
+                   [class.invalid]="isInvalid('name')">
+            @if (isInvalid('name')) { <span class="error">Name is required</span> }
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="your@email.com"
+                   [class.invalid]="isInvalid('email')">
+            @if (isInvalid('email')) { <span class="error">Valid email is required</span> }
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" formControlName="password" placeholder="Min 8 chars, upper, lower, number"
+                   [class.invalid]="isInvalid('password')">
+            @if (isInvalid('password')) {
+              <span class="error">
+                Password must be 8+ chars with uppercase, lowercase and number
+              </span>
+            }
+          </div>
+
+          @if (errorMessage) {
+            <div class="alert-error">{{ errorMessage }}</div>
+          }
+
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            {{ loading ? 'Creating account...' : 'Create Account' }}
+          </button>
+        </form>
+
+        <p class="auth-link">
+          Already have an account? <a routerLink="/login">Sign In</a>
+        </p>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .auth-container {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem;
+    }
+    .auth-card {
+      background: white; border-radius: 12px; padding: 2.5rem;
+      width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .auth-title { color: #667eea; text-align: center; font-size: 1.8rem; margin: 0 0 0.25rem; }
+    .auth-subtitle { text-align: center; color: #666; font-weight: 400; margin: 0 0 2rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-weight: 500; margin-bottom: 0.4rem; color: #444; }
+    input {
+      width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px;
+      font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: #667eea; }
+    input.invalid { border-color: #e53e3e; }
+    .error { color: #e53e3e; font-size: 0.8rem; margin-top: 0.25rem; display: block; }
+    .alert-error {
+      background: #fff5f5; border: 1px solid #fed7d7; color: #c53030;
+      padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;
+    }
+    .btn-primary {
+      width: 100%; padding: 0.875rem; background: #667eea; color: white;
+      border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) { background: #5a67d8; }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+    .auth-link { text-align: center; margin-top: 1.25rem; color: #666; }
+    .auth-link a { color: #667eea; font-weight: 600; text-decoration: none; }
+  `]
+})
+export class RegisterComponent {
+  private auth = inject(AuthService);
+  private fb = inject(FormBuilder);
+
+  form = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    ]]
+  });
+
+  loading = false;
+  errorMessage = '';
+
+  isInvalid(field: string): boolean {
+    const ctrl = this.form.get(field);
+    return !!(ctrl?.invalid && ctrl.touched);
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.auth.register(this.form.value as any).subscribe({
+      next: () => this.loading = false,
+      error: (err) => {
+        this.loading = false;
+        this.errorMessage = err.error?.message ?? 'Registration failed.';
+      }
+    });
+  }
+}

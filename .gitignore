@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# JetBrains / Rider
+.idea/
+*.sln.iml
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+nuget.config
+
+# Test results
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+
+# Angular / Node
+frontend/task-manager-ui/node_modules/
+frontend/task-manager-ui/dist/
+frontend/task-manager-ui/.angular/
+
+# Environment / secrets
+appsettings.*.json
+!appsettings.Development.json
+.env
+
+# Logs
+*.log
