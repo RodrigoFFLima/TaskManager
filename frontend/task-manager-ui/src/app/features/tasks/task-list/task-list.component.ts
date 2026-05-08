@@ -16,7 +16,7 @@ import { TaskCardComponent } from '../task-card/task-card.component';
       <header class="header">
         <div class="header-left">
           <h1>Task Manager</h1>
-          <span class="task-count">{{ filteredTasks().length }} tasks</span>
+          <span class="task-count">{{ filteredTasks().length }} {{ filteredTasks().length === 1 ? 'task' : 'tasks' }}</span>
         </div>
         <div class="header-right">
           <span class="user-name">{{ user?.name }}</span>
@@ -45,10 +45,15 @@ import { TaskCardComponent } from '../task-card/task-card.component';
       </div>
 
       @if (loading()) {
-        <div class="loading">Loading tasks...</div>
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Loading tasks...</span>
+        </div>
       } @else if (filteredTasks().length === 0) {
         <div class="empty-state">
-          <p>No tasks found. Create your first task!</p>
+          <div class="empty-icon">◫</div>
+          <p class="empty-title">No tasks found</p>
+          <p class="empty-sub">{{ statusFilter || priorityFilter ? 'Try clearing the filters.' : 'Create your first task to get started.' }}</p>
         </div>
       } @else {
         <div class="task-grid">
@@ -73,59 +78,95 @@ import { TaskCardComponent } from '../task-card/task-card.component';
     </div>
   `,
   styles: [`
-    .layout { min-height: 100vh; background: #f7f8fc; }
+    .layout { min-height: 100vh; background: #080d1a; }
+
     .header {
-      background: white; padding: 1rem 2rem;
+      background: rgba(8,13,26,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0.875rem 2rem;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 10;
+      position: sticky; top: 0; z-index: 10;
     }
     .header-left { display: flex; align-items: center; gap: 1rem; }
-    .header-left h1 { margin: 0; color: #667eea; font-size: 1.5rem; }
+    .header-left h1 {
+      margin: 0; font-size: 1.25rem; font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc, #22d3ee);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
     .task-count {
-      background: #667eea; color: white; padding: 0.2rem 0.6rem;
-      border-radius: 20px; font-size: 0.8rem;
+      background: rgba(99,102,241,0.15); color: #a5b4fc;
+      border: 1px solid rgba(99,102,241,0.25);
+      padding: 0.15rem 0.6rem; border-radius: 20px; font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace; font-weight: 600;
     }
     .header-right { display: flex; align-items: center; gap: 1rem; }
-    .user-name { color: #555; font-weight: 500; }
+    .user-name { color: #64748b; font-size: 0.9rem; }
     .btn-logout {
-      padding: 0.5rem 1rem; border: 2px solid #e53e3e; color: #e53e3e;
-      border-radius: 6px; background: none; cursor: pointer; font-weight: 600;
-      transition: all 0.2s;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(244,63,94,0.3); color: #f43f5e;
+      border-radius: 6px; background: rgba(244,63,94,0.05); cursor: pointer;
+      font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
     }
-    .btn-logout:hover { background: #e53e3e; color: white; }
+    .btn-logout:hover { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.5); }
 
     .toolbar {
-      padding: 1.5rem 2rem; display: flex; align-items: center;
+      padding: 1.25rem 2rem; display: flex; align-items: center;
       justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
     }
     .filters { display: flex; gap: 0.75rem; flex-wrap: wrap; }
     select {
-      padding: 0.5rem 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;
-      font-size: 0.9rem; color: #444; background: white; cursor: pointer;
+      padding: 0.45rem 0.75rem;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; font-size: 0.875rem; color: #94a3b8; cursor: pointer;
+      transition: border-color 0.2s;
     }
-    select:focus { outline: none; border-color: #667eea; }
+    select:focus { outline: none; border-color: #6366f1; }
+    select option { background: #0f1629; color: #e2e8f0; }
 
     .btn-primary {
-      padding: 0.6rem 1.5rem; background: #667eea; color: white;
-      border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; transition: background 0.2s; white-space: nowrap;
+      padding: 0.5rem 1.25rem;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
     }
-    .btn-primary:hover { background: #5a67d8; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,0.45); }
 
     .task-grid {
-      padding: 0 2rem 2rem;
+      padding: 1.5rem 2rem 2rem;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 1.25rem;
     }
-    .loading, .empty-state {
-      text-align: center; padding: 4rem; color: #888; font-size: 1.1rem;
+
+    .loading {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 1rem; padding: 5rem; color: #475569;
     }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid rgba(99,102,241,0.15);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center; padding: 5rem 2rem; color: #475569;
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+    .empty-title { font-size: 1.1rem; font-weight: 600; color: #64748b; margin: 0 0 0.5rem; }
+    .empty-sub { font-size: 0.875rem; color: #475569; margin: 0; }
 
     @media (max-width: 600px) {
+      .header { padding: 0.875rem 1rem; }
       .toolbar { padding: 1rem; flex-direction: column; align-items: stretch; }
       .btn-primary { width: 100%; text-align: center; }
-      .task-grid { padding: 0 1rem 1rem; grid-template-columns: 1fr; }
+      .task-grid { padding: 1rem; grid-template-columns: 1fr; }
     }
   `]
 })

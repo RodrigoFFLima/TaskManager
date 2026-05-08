@@ -58,36 +58,54 @@ import { AuthService } from '../../../core/services/auth.service';
   styles: [`
     .auth-container {
       min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem;
+      background: radial-gradient(ellipse at 60% 20%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(34,211,238,0.08) 0%, transparent 50%),
+                  #080d1a;
+      padding: 1rem;
     }
     .auth-card {
-      background: white; border-radius: 12px; padding: 2.5rem;
-      width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 2.5rem;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1);
     }
-    .auth-title { color: #667eea; text-align: center; font-size: 1.8rem; margin: 0 0 0.25rem; }
-    .auth-subtitle { text-align: center; color: #666; font-weight: 400; margin: 0 0 2rem; }
+    .auth-title {
+      background: linear-gradient(135deg, #a5b4fc, #22d3ee);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-align: center; font-size: 1.8rem; margin: 0 0 0.25rem; font-weight: 700;
+    }
+    .auth-subtitle { text-align: center; color: #64748b; font-weight: 400; margin: 0 0 2rem; }
     .form-group { margin-bottom: 1.25rem; }
-    label { display: block; font-weight: 500; margin-bottom: 0.4rem; color: #444; }
+    label { display: block; font-weight: 500; margin-bottom: 0.4rem; color: #94a3b8; font-size: 0.9rem; }
     input {
-      width: 100%; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 8px;
-      font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;
+      width: 100%; padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; font-size: 1rem; color: #e2e8f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    input:focus { outline: none; border-color: #667eea; }
-    input.invalid { border-color: #e53e3e; }
-    .error { color: #e53e3e; font-size: 0.8rem; margin-top: 0.25rem; display: block; }
+    input::placeholder { color: #475569; }
+    input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    input.invalid { border-color: #f43f5e; }
+    .error { color: #f43f5e; font-size: 0.8rem; margin-top: 0.25rem; display: block; }
     .alert-error {
-      background: #fff5f5; border: 1px solid #fed7d7; color: #c53030;
+      background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); color: #fda4af;
       padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;
     }
     .btn-primary {
-      width: 100%; padding: 0.875rem; background: #667eea; color: white;
-      border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
-      cursor: pointer; transition: background 0.2s;
+      width: 100%; padding: 0.875rem;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.3);
     }
-    .btn-primary:hover:not(:disabled) { background: #5a67d8; }
-    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-    .auth-link { text-align: center; margin-top: 1.25rem; color: #666; }
-    .auth-link a { color: #667eea; font-weight: 600; text-decoration: none; }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.45); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-link { text-align: center; margin-top: 1.25rem; color: #64748b; }
+    .auth-link a { color: #818cf8; font-weight: 600; text-decoration: none; }
+    .auth-link a:hover { color: #a5b4fc; }
   `]
 })
 export class RegisterComponent {
