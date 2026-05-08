@@ -165,14 +165,14 @@ This project was built with **Claude Code** (`claude-sonnet-4-6`) — Anthropic'
 
 #### Prompt 1 — Full project scaffolding (condensed)
 
-> "Quero que você crie um projeto Full Stack para um teste técnico de Full Stack .NET Developer.
-> Backend: .NET 8, Clean Architecture, 5 projetos source + 4 test projects (xUnit + Moq + FluentAssertions).
-> Projetos: TaskManager.Domain, TaskManager.Application, TaskManager.Infrastructure, TaskManager.Api (port 5000), TaskManager.Auth (port 5001).
-> Regras: Npgsql RAW SQL only — sem EF Core, Dapper ou MediatR. JWT Bearer auth, BCrypt hash, FluentValidation.
-> Domain: entidades com factory methods, Value Objects (Email, TaskStatusValue com transições de status).
-> Frontend: Angular 17 standalone — Login, Register, task list com CRUD completo, JWT interceptor, AuthGuard, Reactive Forms.
-> Docker Compose: tudo sobe com `docker compose up`. Seed data com demo@taskmanager.com / Demo@1234.
-> Docs obrigatórios: USER_STORY.md, README.md, GENAI.md."
+> "Create a Full Stack project for a Full Stack .NET Developer technical test.
+> Backend: .NET 8, Clean Architecture, 5 source projects + 4 test projects (xUnit + Moq + FluentAssertions).
+> Projects: TaskManager.Domain, TaskManager.Application, TaskManager.Infrastructure, TaskManager.Api (port 5000), TaskManager.Auth (port 5001).
+> Rules: Npgsql RAW SQL only — no EF Core, Dapper, or MediatR. JWT Bearer auth, BCrypt hashing, FluentValidation.
+> Domain: entities with factory methods, Value Objects (Email, TaskStatusValue with status transition rules).
+> Frontend: Angular 17 standalone — Login, Register, task list with full CRUD, JWT interceptor, AuthGuard, Reactive Forms.
+> Docker Compose: everything starts with `docker compose up`. Seed data with demo@taskmanager.com / Demo@1234.
+> Required docs: USER_STORY.md, README.md, GENAI.md."
 
 **What was generated:** The complete project structure — 5 source assemblies, 4 test projects, full Angular SPA, Docker Compose with multi-stage Dockerfiles, all documentation files, 37 tests passing on first `dotnet test` run.
 
@@ -180,7 +180,7 @@ This project was built with **Claude Code** (`claude-sonnet-4-6`) — Anthropic'
 
 #### Prompt 2 — Test coverage expansion
 
-> "Continue com os testes"
+> "Continue with the tests"
 
 **What was generated:** Full test suites for all four test projects:
 - `TaskStatusValueTests` — complete 8-case transition matrix as `[Theory]`
@@ -193,7 +193,7 @@ This project was built with **Claude Code** (`claude-sonnet-4-6`) — Anthropic'
 
 #### Prompt 3 — Docker Compose debug
 
-> "docker está rodando, sobe o docker-compose"
+> "Docker is running, bring up the docker-compose stack"
 
 **What was generated:** Identified two root causes — macOS AirPlay Receiver occupying port 5000 and an incorrect BCrypt hash in seed data. Remapped services to ports 8080/8081, generated the correct hash via a temp .NET program, updated `DatabaseMigrator.cs`, and patched the live container via `docker exec`.
 
