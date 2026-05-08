@@ -160,6 +160,33 @@ public class TasksControllerTests : IClassFixture<TestWebApplicationFactory>
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task Create_LocationHeaderPointsToNewTask()
+    {
+        var newId = Guid.NewGuid();
+        var created = new TaskDto(newId, "Task", null, "Pending", "Medium",
+            null, _userId, DateTime.UtcNow, DateTime.UtcNow);
+
+        _taskServiceMock.Setup(s => s.CreateAsync(It.IsAny<CreateTaskRequest>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(created);
+
+        var response = await _authenticatedClient.PostAsJsonAsync("/api/tasks",
+            new CreateTaskRequest("Task", null, "Medium", null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response.Headers.Location!.ToString().Should().EndWith($"/api/tasks/{newId}");
+    }
+
+    [Fact]
+    public async Task GetById_InvalidGuidFormat_Returns404()
+    {
+        // The {id:guid} route constraint means non-GUID values don't match any route at all —
+        // ASP.NET Core returns 404 (no route matched) rather than 400 (model binding failure).
+        var response = await _authenticatedClient.GetAsync("/api/tasks/not-a-valid-guid");
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     // ── PUT /api/tasks/{id} ───────────────────────────────────────────────────
 
     [Fact]
@@ -196,6 +223,18 @@ public class TasksControllerTests : IClassFixture<TestWebApplicationFactory>
             new UpdateTaskRequest("T", null, "Low", null));
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task Update_ValidationFails_Returns400()
+    {
+        _taskServiceMock.Setup(s => s.UpdateAsync(It.IsAny<Guid>(), It.IsAny<UpdateTaskRequest>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ValidationException("Title is required."));
+
+        var response = await _authenticatedClient.PutAsJsonAsync($"/api/tasks/{Guid.NewGuid()}",
+            new UpdateTaskRequest("", null, "Low", null));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     // ── PATCH /api/tasks/{id}/status ─────────────────────────────────────────
@@ -236,6 +275,18 @@ public class TasksControllerTests : IClassFixture<TestWebApplicationFactory>
             $"/api/tasks/{Guid.NewGuid()}/status", new ChangeStatusRequest("Completed"));
 
         response.StatusCode.Should().Be(HttpStatusCode.UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task ChangeStatus_TaskNotFound_Returns404()
+    {
+        _taskServiceMock.Setup(s => s.ChangeStatusAsync(It.IsAny<Guid>(), It.IsAny<ChangeStatusRequest>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotFoundException("Task not found."));
+
+        var response = await _authenticatedClient.PatchAsJsonAsync(
+            $"/api/tasks/{Guid.NewGuid()}/status", new ChangeStatusRequest("InProgress"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     // ── DELETE /api/tasks/{id} ────────────────────────────────────────────────

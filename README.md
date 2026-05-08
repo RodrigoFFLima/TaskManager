@@ -130,14 +130,14 @@ dotnet test
 dotnet test --logger "console;verbosity=normal"
 ```
 
-**Results**: 37 tests — 0 failures
+**Results**: 136 tests — 0 failures
 
 | Project | Tests |
 |---------|-------|
-| Domain.Tests | 13 |
-| Application.Tests | 11 |
-| Infrastructure.Tests | 4 |
-| Api.Tests | 2 (WebApplicationFactory) |
+| Domain.Tests | 50 |
+| Application.Tests | 48 |
+| Infrastructure.Tests | 15 |
+| Api.Tests | 23 (WebApplicationFactory) |
 
 ## Key Design Decisions
 
