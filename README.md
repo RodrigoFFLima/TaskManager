@@ -2,6 +2,9 @@
 
 A production-quality Task Management system built with Clean Architecture, DDD, and Npgsql raw SQL.
 
+> **Quick demo** — start with `docker compose up --build` and log in at http://localhost:4200
+> Email: `demo@taskmanager.com` · Password: `Demo@1234`
+
 ## Tech Stack
 
 | Layer | Technology |

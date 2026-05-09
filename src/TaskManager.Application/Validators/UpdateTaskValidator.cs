@@ -21,5 +21,10 @@ public class UpdateTaskValidator : AbstractValidator<UpdateTaskRequest>
             .NotEmpty().WithMessage("Priority is required.")
             .Must(p => ValidPriorities.Contains(p))
             .WithMessage($"Priority must be one of: {string.Join(", ", ValidPriorities)}.");
+
+        RuleFor(x => x.DueDate)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Date)
+            .WithMessage("Due date cannot be in the past.")
+            .When(x => x.DueDate.HasValue);
     }
 }
