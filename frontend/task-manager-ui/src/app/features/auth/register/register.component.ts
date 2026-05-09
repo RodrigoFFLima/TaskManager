@@ -18,21 +18,21 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label>Name</label>
             <input type="text" formControlName="name" placeholder="Your full name"
-                   [class.invalid]="isInvalid('name')">
+                   autocomplete="name" [class.invalid]="isInvalid('name')">
             @if (isInvalid('name')) { <span class="error">Name is required</span> }
           </div>
 
           <div class="form-group">
             <label>Email</label>
             <input type="email" formControlName="email" placeholder="your@email.com"
-                   [class.invalid]="isInvalid('email')">
+                   autocomplete="email" [class.invalid]="isInvalid('email')">
             @if (isInvalid('email')) { <span class="error">Valid email is required</span> }
           </div>
 
           <div class="form-group">
             <label>Password</label>
             <input type="password" formControlName="password" placeholder="Min 8 chars, upper, lower, number"
-                   [class.invalid]="isInvalid('password')">
+                   autocomplete="new-password" [class.invalid]="isInvalid('password')">
             @if (isInvalid('password')) {
               <span class="error">
                 Password must be 8+ chars with uppercase, lowercase and number

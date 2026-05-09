@@ -18,7 +18,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label for="email">Email</label>
             <input id="email" type="email" formControlName="email"
-                   placeholder="demo@taskmanager.com"
+                   placeholder="demo@taskmanager.com" autocomplete="email"
                    [class.invalid]="form.get('email')?.invalid && form.get('email')?.touched">
             @if (form.get('email')?.invalid && form.get('email')?.touched) {
               <span class="error">Valid email is required</span>
@@ -28,7 +28,7 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="form-group">
             <label for="password">Password</label>
             <input id="password" type="password" formControlName="password"
-                   placeholder="Password"
+                   placeholder="Password" autocomplete="current-password"
                    [class.invalid]="form.get('password')?.invalid && form.get('password')?.touched">
             @if (form.get('password')?.invalid && form.get('password')?.touched) {
               <span class="error">Password is required</span>
