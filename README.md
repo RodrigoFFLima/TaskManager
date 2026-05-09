@@ -36,6 +36,86 @@ TaskManager.sln
 
 **Dependency flow**: Api/Auth → Application → Domain ← Infrastructure
 
+### Layer Dependency Diagram
+
+```mermaid
+graph TD
+    subgraph Frontend["Frontend (Angular 17)"]
+        UI[Angular SPA<br/>:4200]
+    end
+
+    subgraph Services["Backend Services"]
+        AUTH[TaskManager.Auth<br/>:8081]
+        API[TaskManager.Api<br/>:8080]
+    end
+
+    subgraph Application["Application Layer"]
+        SVC[Services<br/>AuthService · TaskService]
+        VAL[Validators<br/>FluentValidation]
+        IFACE[Interfaces<br/>ITaskRepository · IPasswordHasher]
+    end
+
+    subgraph Domain["Domain Layer (no dependencies)"]
+        ENT[Entities<br/>TaskItem · User]
+        VO[Value Objects<br/>Email · TaskStatusValue]
+        EXC[Domain Exceptions]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        REPO[Repositories<br/>Npgsql raw SQL]
+        JWT[JwtService]
+        BCR[PasswordHasher<br/>BCrypt]
+    end
+
+    DB[(PostgreSQL 16)]
+
+    UI -->|"JWT Bearer"| API
+    UI -->|"login / register"| AUTH
+    AUTH --> SVC
+    API --> SVC
+    SVC --> IFACE
+    SVC --> VAL
+    IFACE -.->|"implemented by"| REPO
+    IFACE -.->|"implemented by"| BCR
+    ENT --> VO
+    ENT --> EXC
+    SVC --> ENT
+    REPO --> DB
+    JWT --> DB
+```
+
+### Request Flow — Authenticated Task Creation
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Angular
+    participant AuthInterceptor
+    participant API as TaskManager.Api
+    participant TaskService
+    participant Validator
+    participant TaskItem
+    participant Repository
+    participant DB as PostgreSQL
+
+    User->>Angular: fills form and clicks Create
+    Angular->>AuthInterceptor: HTTP POST /api/tasks
+    AuthInterceptor->>API: adds Authorization: Bearer {token}
+    API->>API: JWT middleware validates token
+    API->>TaskService: CreateAsync(request, userId)
+    TaskService->>Validator: validate CreateTaskRequest
+    Validator-->>TaskService: valid
+    TaskService->>TaskItem: TaskItem.Create(title, priority, ...)
+    TaskItem-->>TaskService: domain entity
+    TaskService->>Repository: AddAsync(taskItem)
+    Repository->>DB: INSERT INTO tasks ... (parameterized)
+    DB-->>Repository: new row
+    Repository-->>TaskService: TaskItem
+    TaskService-->>API: TaskDto
+    API-->>Angular: 201 Created + Location header
+    Angular-->>User: task appears in list
+```
+
 ## Quick Start — Docker Compose
 
 ```bash
@@ -176,7 +256,7 @@ This project was built with **Claude Code** (`claude-sonnet-4-6`) — Anthropic'
 
 > **Note:** The original job spec referenced .NET 8. Since only the .NET 9 SDK was available on the development machine, the project targets `net9.0`. The APIs are identical — no .NET 9-specific features were used.
 
-**What was generated:** The complete project structure — 5 source assemblies, 4 test projects, full Angular SPA, Docker Compose with multi-stage Dockerfiles, all documentation files, 37 tests passing on first `dotnet test` run.
+**What was generated:** The complete project structure — 5 source assemblies, 4 test projects, full Angular SPA, Docker Compose with multi-stage Dockerfiles, all documentation files, 136 tests passing on first `dotnet test` run.
 
 ---
 
