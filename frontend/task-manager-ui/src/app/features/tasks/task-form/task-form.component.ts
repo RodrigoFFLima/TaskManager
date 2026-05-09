@@ -1,8 +1,17 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { TaskService } from '../../../core/services/task.service';
 import { Task } from '../../../core/models/task.model';
+
+function notInPast(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  const [year, month, day] = (control.value as string).split('-').map(Number);
+  const selected = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return selected < today ? { pastDate: true } : null;
+}
 
 @Component({
   selector: 'app-task-form',
@@ -41,7 +50,9 @@ import { Task } from '../../../core/models/task.model';
             </div>
             <div class="form-group">
               <label>Due Date</label>
-              <input type="date" formControlName="dueDate">
+              <input type="date" formControlName="dueDate"
+                     [class.invalid]="isInvalid('dueDate')">
+              @if (isInvalid('dueDate')) { <span class="error">Due date cannot be in the past</span> }
             </div>
           </div>
 
@@ -156,7 +167,7 @@ export class TaskFormComponent implements OnInit {
     title: ['', [Validators.required, Validators.maxLength(200)]],
     description: [''],
     priority: ['Medium'],
-    dueDate: [null as string | null]
+    dueDate: [null as string | null, notInPast]
   });
 
   loading = false;
@@ -206,7 +217,10 @@ export class TaskFormComponent implements OnInit {
       next: () => { this.loading = false; this.saved.emit(); },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = err.error?.message ?? 'Failed to save task.';
+        const errors: { message: string }[] = err.error?.errors;
+        this.errorMessage = errors?.length
+          ? errors.map(e => e.message).join(' ')
+          : (err.error?.message ?? 'Failed to save task.');
       }
     });
   }
